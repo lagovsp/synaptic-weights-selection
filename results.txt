@@ -1,0 +1,12 @@
+data:
+d = w0 = 0
+c = w1 = 8
+
+experiment w/ A = 10
+golden-passive coeffs: [1.8000000000000007, 9.957427527495584]
+lowest squares method coeffs: [0.23973317834525432, 8.39548522580512]
+
+experiment w/ A = 0
+golden-passive coeffs: [1.9500000000000002, 9.957427527495584]
+lowest squares method coeffs: [0.0, 8.0]
+
