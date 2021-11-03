@@ -5,6 +5,7 @@ import algorithms as alg
 
 D = 0
 C = 8
+E = 0.001
 
 
 def fun(x, ws):
@@ -17,7 +18,7 @@ def fun_by_weights_fun(fun_frame, ws):
 	return fun_by_weights
 
 
-def rf(x):
+def fun_ref(x):
 	return fun_by_weights_fun(fun, [D, C])(x)
 
 
@@ -52,27 +53,22 @@ def conduct_experiment(rf, a, b, N, A):
 	plt.add_dots_to_plot(mpl, dots)
 	mpl.legend()
 	mpl.show()
-	print(f'A = {A}')
-	print(gs_search[0])
-	print(coefficients)
 	with open('results.txt', 'a') as file:
 		file.write(f'experiment w/ A = {A}\n')
 		file.write(f'golden-passive coeffs: {gs_search[0]}\n')
 		file.write(f'lowest squares method coeffs: {coefficients}\n\n')
+	plt.graph(f_args_from_list_to_positional(error_fun), -4, 4, 4, 12, f'err-fun-sur w/ A ={A}')
 	return [dots, coefficients, error_fun, alg.golden_section(error_fun)]
 
 
 def main():
-	a, b, N, A = -4, 2, 24, 10
+	a, b, N, A1, A2 = -4, 2, 24, 10, 0
 
 	with open('results.txt', 'w') as file:
-		file.write(f'data:\nd = w0 = {D}\nc = w1 = {C}\n\n')
+		file.write(f'data given:\nd = w0 = {D}\nc = w1 = {C}\n\n')
 
-	noise_on = conduct_experiment(rf, a, b, N, A)
-	noise_off = conduct_experiment(rf, a, b, N, 0)
-
-	plt.graph(f_args_from_list_to_positional(noise_on[2]), -4, 4, 4, 12, f'error fun sur w/ A ={A}')
-	plt.graph(f_args_from_list_to_positional(noise_off[2]), -4, 4, 4, 12, 'error fun sur w/ A = 0')
+	conduct_experiment(fun_ref, a, b, N, A1)
+	conduct_experiment(fun_ref, a, b, N, A2)
 
 
 if __name__ == '__main__':
