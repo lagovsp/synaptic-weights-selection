@@ -22,7 +22,7 @@ def add_fun_to_plot(p, f, lab, a = -4, b = 2, N = 24, mark = ''):
 
 
 def graph(f, w0l, w0r, w1l, w1r, title = 'function'):
-	g3d = mpl.figure(figsize = (15, 15)).add_subplot(projection = '3d')
+	g3d = mpl.figure(figsize = (10, 10)).add_subplot(projection = '3d')
 	w0 = np.arange(w0l, w0r, 0.1)
 	w1 = np.arange(w1l, w1r, 0.1)
 	w0g, w1g = np.meshgrid(w0, w1)

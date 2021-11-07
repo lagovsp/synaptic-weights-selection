@@ -38,19 +38,21 @@ def f_args_from_list_to_positional(fun_to_modify):
 	return f_return
 
 
-def conduct_experiment(rf, a, b, N, A, pop, gens, mp, max_flag = False):
-	dots = plt.get_dots(rf, a, b, N, A)
+def conduct_experiment(init_f, a, b, N, A, pop, gens, mp, max_flag = False):
+	dots = plt.get_dots(init_f, a, b, N, A)
 	error_fun = f_args_from_list_to_positional(f_error_to_f_by_weights(dots))
 
 	Being.set_mut_prob(mp)
 	Being.set_dev_amp(0.05)  # let it be as a default
-	Being.set_borders([[-10, 10], [-10, 10]])  # pretty wide range
+	x1, x2 = -20, 20
+	y1, y2 = -20, 20
+	Being.set_borders([[x1, x2], [y1, y2]])  # pretty wide range
 	Being.set_f(error_fun)
 	ws = genetic(pop, gens, maximum = max_flag)[0].best_being().values()[:2]
 
 	coefficients = gradient(dots)
 	mpl.title(f'plots w/ A = {A}')
-	plt.add_fun_to_plot(mpl, rf, 'given function')
+	plt.add_fun_to_plot(mpl, init_f, 'given function')
 	plt.add_fun_to_plot(mpl, f_by_weights_f(f_frame, ws), 'genetic function')
 	plt.add_fun_to_plot(mpl, f_by_weights_f(f_frame, coefficients), 'gradient function')
 	plt.add_dots_to_plot(mpl, dots)
@@ -61,7 +63,8 @@ def conduct_experiment(rf, a, b, N, A, pop, gens, mp, max_flag = False):
 		file.write(f'experiment w/ A = {A}\n')
 		file.write(f'genetic coefficients: {ws}\n')
 		file.write(f'lowest squares method coefficients: {coefficients}\n\n')
-	plt.graph(error_fun, -10, 10, -10, 10, f'err-fun-sur w/ A ={A}')
+
+	plt.graph(error_fun, x1, x2, y1, y2, f'err-fun-sur w/ A ={A}')
 	return [ws, dots, coefficients]
 
 
