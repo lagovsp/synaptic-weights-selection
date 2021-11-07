@@ -1,5 +1,7 @@
 import math
-from main import D, C, E
+from main import D, C
+
+E = 0.001
 
 
 def fix_one_arg(f_two_arg, c):

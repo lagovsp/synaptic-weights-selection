@@ -1,32 +1,29 @@
+from gsl import *
 import plots as plt
 import matplotlib.pyplot as mpl
-import algorithms as alg
+
+D, C = 0, 8
 
 
-D = 0
-C = 8
-E = 0.001
-
-
-def fun(x, ws):
+def f_frame(x, ws):
 	return ws[0] + x * ws[1]
 
 
-def fun_by_weights_fun(fun_frame, ws):
+def f_by_weights_f(ff, ws):
 	def fun_by_weights(x):
-		return fun_frame(x, ws)
+		return ff(x, ws)
 	return fun_by_weights
 
 
-def fun_ref(x):
-	return fun_by_weights_fun(fun, [D, C])(x)
+def f(x):
+	return f_by_weights_f(f_frame, [D, C])(x)
 
 
-def fun_error_to_fun_by_weights(dots):
-	def fun_to_return(ws):
-		fun_predicted = fun_by_weights_fun(fun, ws)
+def f_error_to_f_by_weights(dots):
+	def f_to_return(ws):
+		fun_predicted = f_by_weights_f(f_frame, ws)
 		return sum((fun_predicted(x) - dots[1][i]) ** 2 for i, x in enumerate(dots[0]))
-	return fun_to_return
+	return f_to_return
 
 
 def gradient(dots):
@@ -41,34 +38,47 @@ def f_args_from_list_to_positional(fun_to_modify):
 	return f_return
 
 
-def conduct_experiment(rf, a, b, N, A):
+def conduct_experiment(rf, a, b, N, A, pop, gens, mp, max_flag = False):
 	dots = plt.get_dots(rf, a, b, N, A)
-	error_fun = fun_error_to_fun_by_weights(dots)
-	gs_search = alg.golden_section(error_fun)
+	error_fun = f_args_from_list_to_positional(f_error_to_f_by_weights(dots))
+
+	Being.set_mut_prob(mp)
+	Being.set_dev_amp(0.05)  # let it be as a default
+	Being.set_borders([[-10, 10], [-10, 10]])  # pretty wide range
+	Being.set_f(error_fun)
+	ws = genetic(pop, gens, maximum = max_flag)[0].best_being().values()[:2]
+
 	coefficients = gradient(dots)
 	mpl.title(f'plots w/ A = {A}')
 	plt.add_fun_to_plot(mpl, rf, 'given function')
-	plt.add_fun_to_plot(mpl, fun_by_weights_fun(fun, gs_search[0]), 'golden-passive function')
-	plt.add_fun_to_plot(mpl, fun_by_weights_fun(fun, coefficients), 'gradient function')
+	plt.add_fun_to_plot(mpl, f_by_weights_f(f_frame, ws), 'genetic function')
+	plt.add_fun_to_plot(mpl, f_by_weights_f(f_frame, coefficients), 'gradient function')
 	plt.add_dots_to_plot(mpl, dots)
 	mpl.legend()
 	mpl.show()
+
 	with open('results.txt', 'a') as file:
 		file.write(f'experiment w/ A = {A}\n')
-		file.write(f'golden-passive coeffs: {gs_search[0]}\n')
-		file.write(f'lowest squares method coeffs: {coefficients}\n\n')
-	plt.graph(f_args_from_list_to_positional(error_fun), -4, 4, 4, 12, f'err-fun-sur w/ A ={A}')
-	return [dots, coefficients, error_fun, alg.golden_section(error_fun)]
+		file.write(f'genetic coefficients: {ws}\n')
+		file.write(f'lowest squares method coefficients: {coefficients}\n\n')
+	plt.graph(error_fun, -10, 10, -10, 10, f'err-fun-sur w/ A ={A}')
+	return [ws, dots, coefficients]
 
 
 def main():
-	a, b, N, A1, A2 = -4, 2, 24, 10, 0
+	a, b = -4, 2
+	N = 24
+	A1, A2 = 10, 0
+
+	pop = 4
+	gens = 50
+	mut_prob = 0.25
 
 	with open('results.txt', 'w') as file:
 		file.write(f'data given:\nd = w0 = {D}\nc = w1 = {C}\n\n')
 
-	conduct_experiment(fun_ref, a, b, N, A1)
-	conduct_experiment(fun_ref, a, b, N, A2)
+	conduct_experiment(f, a, b, N, A1, pop, gens, mut_prob, False)
+	conduct_experiment(f, a, b, N, A2, pop, gens, mut_prob, False)
 
 
 if __name__ == '__main__':
